@@ -1,0 +1,42 @@
+name: nsart-check
+
+on:
+  schedule:
+    - cron: '0 5 * * *'   # 매일 05:00 UTC = 14:00 한국시간
+  workflow_dispatch:
+    inputs:
+      test:
+        description: '테스트 메시지 보내기'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency: nsart-check
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check new performances
+        run: node check.mjs
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TEST_MESSAGE: ${{ inputs.test }}
+      - name: Save state
+        if: always()
+        run: |
+          if ! git diff --quiet -- state.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add state.json
+            git commit -m "update state"
+            git push
+          fi
