@@ -1,5 +1,5 @@
 // 네이버 블로그 I U H O L I C (smotherguy) 제목에 '언급'이 들어간 새 글 → 텔레그램 알림
-// GitHub Actions에서 매시간 실행. 상태는 iuholic-state.json에 저장.
+// GitHub Actions에서 매일 17:23(한국시간) 실행. 상태는 iuholic-state.json에 저장.
 import fs from 'node:fs';
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -62,7 +62,7 @@ if (!posts.length) throw new Error('RSS에서 글을 0개 읽었습니다 (구�
 console.log(`RSS 글 ${posts.length}개, 최신 ${posts[0].id} ${posts[0].title}`);
 
 if (TEST) {
-  await sendTelegram(`[테스트] GitHub Actions 연결 확인\nI U H O L I C 블로그 RSS에서 글 ${posts.length}개를 읽었습니다.\n매시간 확인하며, PC나 Aside가 꺼져 있어도 작동합니다.`);
+  await sendTelegram(`[테스트] GitHub Actions 연결 확인\nI U H O L I C 블로그 RSS에서 글 ${posts.length}개를 읽었습니다.\n매일 17:23(한국시간)에 확인하며, PC나 Aside가 꺼져 있어도 작동합니다.`);
 }
 
 const fresh = posts.filter((p) => !state.seenIds.includes(p.id)).sort((a, b) => Number(a.id) - Number(b.id));
