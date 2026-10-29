@@ -1,0 +1,42 @@
+name: iuholic-check
+
+on:
+  schedule:
+    - cron: '23 * * * *'   # 매시 23분
+  workflow_dispatch:
+    inputs:
+      test:
+        description: '테스트 메시지 보내기'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency: iuholic-check
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check new posts
+        run: node iuholic.mjs
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.IUHOLIC_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.IUHOLIC_CHAT_ID }}
+          TEST_MESSAGE: ${{ inputs.test }}
+      - name: Save state
+        if: always()
+        run: |
+          if ! git diff --quiet -- iuholic-state.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add iuholic-state.json
+            git commit -m "update iuholic state"
+            for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+          fi
