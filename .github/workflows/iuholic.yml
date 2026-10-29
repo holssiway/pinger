@@ -2,7 +2,7 @@ name: iuholic-check
 
 on:
   schedule:
-    - cron: '23 * * * *'   # 매시 23분
+    - cron: '23 8 * * *'   # 매일 08:23 UTC = 17:23 한국시간
   workflow_dispatch:
     inputs:
       test:
